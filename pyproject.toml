@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "food-independence-simulator"
+version = "0.1.0"
+description = "Phase 0 foundation for the Food Independence Simulator project."
+requires-python = ">=3.13"
+dependencies = [
+  "streamlit>=1.39.0",
+  "pandas>=2.2.0",
+  "numpy>=2.0.0",
+  "plotly>=5.18.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+  "ruff>=0.8.0",
+  "mypy>=1.13.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools]
+packages = ["app", "models", "simulation", "ui"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
