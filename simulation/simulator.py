@@ -1,82 +1,58 @@
-"""
-Simulation engine.
-"""
-
-from models.food_database import FOOD_DATABASE
-from models.population import Population
+from models.crop_database import CROPS
 
 
 class Simulator:
-    """
-    Calculates annual food requirements for a population.
-    """
 
-    def __init__(self, population: Population) -> None:
+    def __init__(self, population):
         self.population = population
 
-    def annual_food_requirements(self) -> dict[str, float]:
-        """
-        Returns the annual food requirement (kg/year)
-        for each food item.
-        """
-        requirements: dict[str, float] = {}
+    def annual_food_requirements(self):
+        requirements = {}
 
-        for consumption in FOOD_DATABASE:
-            requirements[consumption.food.name] = (
-                consumption.kg_per_person_per_year
-                * self.population.size
-            )
-
-        return requirements
-"""Simulation engine."""
-
-from models.crop_database import CROP_DATABASE
-from models.food_database import FOOD_DATABASE
-from models.population import Population
-
-
-class Simulator:
-    """Calculates food requirements, crop area and production."""
-
-    def __init__(self, population: Population) -> None:
-        self.population = population
-
-    def annual_food_requirements(self) -> dict[str, float]:
-        requirements: dict[str, float] = {}
-
-        for consumption in FOOD_DATABASE:
-            requirements[consumption.food.name] = (
-                consumption.kg_per_person_per_year * self.population.size
+        for crop in CROPS.values():
+            requirements[crop.food.name] = (
+                crop.food.per_person * self.population.size
             )
 
         return requirements
 
-    def required_crop_area(self) -> dict[str, float]:
-        requirements = self.annual_food_requirements()
-        result: dict[str, float] = {}
+    def required_crop_area(self):
+        area = {}
 
-        for crop in CROP_DATABASE:
-            food = crop.food.name
-            if food in requirements:
-                result[food] = crop.required_area(requirements[food])
+        for crop in CROPS.values():
 
-        return result
+            amount = crop.food.per_person * self.population.size
 
-    def current_crop_production(self) -> dict[str, float]:
-        result: dict[str, float] = {}
+            area[crop.food.name] = amount / crop.yield_per_ha
 
-        for crop in CROP_DATABASE:
-            result[crop.food.name] = crop.annual_production
+        return area
 
-        return result
+    def current_crop_production(self):
 
-    def self_sufficiency_rates(self) -> dict[str, float]:
-        requirements = self.annual_food_requirements()
-        result: dict[str, float] = {}
+        production = {}
 
-        for crop in CROP_DATABASE:
-            food = crop.food.name
-            if food in requirements:
-                result[food] = crop.self_sufficiency_rate(requirements[food])
+        for crop in CROPS.values():
 
-        return result
+            production[crop.food.name] = (
+                crop.current_area * crop.yield_per_ha
+            )
+
+        return production
+
+    def self_sufficiency_rates(self):
+
+        rate = {}
+
+        production = self.current_crop_production()
+        requirement = self.annual_food_requirements()
+
+        for food in requirement:
+
+            rate[food] = (
+                production[food] / requirement[food]
+            ) * 100
+
+        return rate
+
+    def required_farmland(self):
+        return self.required_crop_area()
